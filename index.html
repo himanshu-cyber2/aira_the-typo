@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AIRA The Typo - Ultimate Typing Speed Game</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;900&family=Orbitron:wght@400;700;900&family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="particles" id="particles"></div>
+    
+    <main>
+        <header class="game-header">
+            <h1 class="game-title">
+                <i class="fas fa-robot"></i>
+                <span class="title-text">AIRA</span>
+                <span class="title-sub">The Typo</span>
+            </h1>
+            <p class="game-subtitle">Master Your Typing Speed</p>
+        </header>
+
+        <section class="stats-container">
+            <div class="stat-card">
+                <i class="fas fa-tachometer-alt"></i>
+                <div class="stat-content">
+                    <div class="stat-label">WPM</div>
+                    <div class="stat-value" id="wpmDisplay">0</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <i class="fas fa-bullseye"></i>
+                <div class="stat-content">
+                    <div class="stat-label">Accuracy</div>
+                    <div class="stat-value" id="accuracyDisplay">100%</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <i class="fas fa-clock"></i>
+                <div class="stat-content">
+                    <div class="stat-label">Time</div>
+                    <div class="stat-value" id="timeDisplay">30s</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <i class="fas fa-fire"></i>
+                <div class="stat-content">
+                    <div class="stat-label">Streak</div>
+                    <div class="stat-value" id="streakDisplay">0</div>
+                </div>
+            </div>
+        </section>
+
+        <section class="controls-container">
+            <div class="control-group">
+                <label for="difficultySelect"><i class="fas fa-layer-group"></i> Difficulty</label>
+                <select id="difficultySelect">
+                    <option value="easy">Easy</option>
+                    <option value="medium" selected>Medium</option>
+                    <option value="hard">Hard</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <label for="durationSelect"><i class="fas fa-hourglass-half"></i> Duration</label>
+                <select id="durationSelect">
+                    <option value="15">15 seconds</option>
+                    <option value="30" selected>30 seconds</option>
+                    <option value="60">60 seconds</option>
+                    <option value="120">120 seconds</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <button class="btn-primary" id="newGameButton">
+                    <i class="fas fa-play"></i> New Game
+                </button>
+            </div>
+        </section>
+
+        <section class="tts-container">
+            <div class="tts-header">
+                <i class="fas fa-volume-up"></i>
+                <span>Text-to-Speech Controls</span>
+            </div>
+            <div class="tts-controls">
+                <div class="control-group">
+                    <label for="voiceSelect"><i class="fas fa-microphone"></i> Voice</label>
+                    <select id="voiceSelect">
+                        <option>Loading voices...</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label for="speedSelect"><i class="fas fa-gauge-high"></i> Speed</label>
+                    <select id="speedSelect">
+                        <option value="0.75">Slow (0.75x)</option>
+                        <option value="1" selected>Normal (1x)</option>
+                        <option value="1.25">Fast (1.25x)</option>
+                        <option value="1.5">Faster (1.5x)</option>
+                    </select>
+                </div>
+            </div>
+            <div class="tts-buttons">
+                <button class="btn-tts" id="speakButton" title="Speak Text">
+                    <i class="fas fa-play"></i>
+                </button>
+                <button class="btn-tts" id="pauseButton" title="Pause/Resume">
+                    <i class="fas fa-pause"></i>
+                </button>
+                <button class="btn-tts" id="stopButton" title="Stop">
+                    <i class="fas fa-stop"></i>
+                </button>
+            </div>
+            <label class="toggle-label">
+                <input type="checkbox" id="autoSpeakToggle" checked>
+                <span>Auto-speak on new game</span>
+            </label>
+            <div class="tts-indicator" id="ttsIndicator">
+                <i class="fas fa-volume-up"></i>
+                <span>Speaking...</span>
+            </div>
+        </section>
+
+        <section class="game-container">
+            <div id="game" tabindex="0">
+                <div id="words"></div>
+                <div id="focus-error">
+                    <i class="fas fa-mouse-pointer"></i>
+                    <p>Click here to focus and start typing</p>
+                </div>
+            </div>
+        </section>
+
+        <div class="progress-container">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+    </main>
+
+    <div class="modal" id="gameOverModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>
+                    <i class="fas fa-trophy"></i>
+                    Game Over!
+                </h2>
+            </div>
+            <div class="modal-body">
+                <div class="final-stats">
+                    <div class="final-stat">
+                        <div class="final-stat-label">Words Per Minute</div>
+                        <div class="final-stat-value" id="finalWpm">0</div>
+                    </div>
+                    <div class="final-stat">
+                        <div class="final-stat-label">Accuracy</div>
+                        <div class="final-stat-value" id="finalAccuracy">100%</div>
+                    </div>
+                    <div class="final-stat">
+                        <div class="final-stat-label">Correct Words</div>
+                        <div class="final-stat-value" id="finalCorrect">0</div>
+                    </div>
+                    <div class="final-stat">
+                        <div class="final-stat-label">Best Streak</div>
+                        <div class="final-stat-value" id="finalStreak">0</div>
+                    </div>
+                </div>
+                <div class="performance-message" id="performanceMessage"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-primary" id="playAgainButton">
+                    <i class="fas fa-redo"></i> Play Again
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AIRATHETYPO</title>
+
+  External CSS
+  <link rel="stylesheet" href="AIRA.CSS"/>
+
+   Font Awesome for icons 
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
+    integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg=="
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"
+  />
+</head>
+<body>
+  <main>
+     Typing Game Title 
+    <h1>
+      <i class="fa-solid fa-keyboard"></i> AiraTheTypo
+    </h1>
+
+     Typing Game Controls 
+    <div id="header">
+      <div id="info">0</div>
+      <div id="buttons">
+        <button id="newGameButton">New Game</button>
+      </div>
+    </div>
+
+     Game Area 
+    <div id="game" tabindex="0">
+      <div id="words"></div>
+      <div id="cursor"></div>
+      <div id="focus-error">Click here to focus</div>
+    </div>
+  </main>
+
+  External JS 
+  <script>
+    const speech = new SpeechSynthesisUtterance();
+    const voiceSelect = document.getElementById("voiceSelect");
+    const speakButton = document.getElementById("speakButton");
+
+    // Speak generated game text
+    function speakGeneratedWords(text) {
+      speech.text = text;
+      window.speechSynthesis.speak(speech);
+    }
+
+    // Expose it globally so AIRA.JS can call it
+    window.speakGeneratedWords = speakGeneratedWords;
+
+    // --------- GAME LOGIC ---------
+    const words = 'The sun began to set, casting a golden hue over the quiet town as the streets slowly emptied'.split(' ');
+    const wordsCount = words.length;
+    const gameTime = 30 * 1000; // 30 seconds
+    window.timer = null;
+    window.gameStart = null;
+
+    function addClass(el, name) {
+      el?.classList.add(name);
+    }
+
+    function removeClass(el, name) {
+      el?.classList.remove(name);
+    }
+
+    function randomWord() {
+      const randomIndex = Math.floor(Math.random() * wordsCount);
+      return words[randomIndex];
+    }
+
+    function formatWord(word) {
+      return `<div class="word">${word.split('').map(letter => `<span class="letter">${letter}</span>`).join('')}</div>`;
+    }
+
+    function createCursor() {
+      const cursor = document.createElement('span');
+      cursor.id = 'cursor';
+      return cursor;
+    }
+
+    function moveCursor(currentLetter) {
+      const cursor = document.getElementById('cursor');
+      if (cursor && currentLetter) {
+        const rect = currentLetter.getBoundingClientRect();
+        const wordsContainer = document.getElementById('words');
+        const containerRect = wordsContainer.getBoundingClientRect();
+        cursor.style.left = `${rect.left - containerRect.left}px`;
+        cursor.style.top = `${rect.top - containerRect.top}px`;
+      }
+    }
+
+    function gameOver() {
+      clearInterval(window.timer);
+      addClass(document.getElementById('game'), 'over');
+      const wpm = getWpm();
+      document.getElementById('info').innerHTML = `Game Over! WPM: ${wpm}`;
+      alert(`Game Over! Your WPM: ${wpm}`);
+    }
+
+    function newGame() {
+      const wordsContainer = document.getElementById('words');
+      wordsContainer.innerHTML = '';
+      let htmlContent = '';
+
+      // Create random words for the game
+      for (let i = 0; i < 200; i++) {
+        htmlContent += formatWord(randomWord());
+      }
+
+      wordsContainer.innerHTML = htmlContent;
+
+      // Set the first word and letter as 'current'
+      const firstWord = document.querySelector('.word');
+      const firstLetter = firstWord?.querySelector('.letter');
+      if (firstWord) addClass(firstWord, 'current');
+      if (firstLetter) addClass(firstLetter, 'current');
+
+      wordsContainer.scrollTop = 0;
+
+      // Add the cursor to the container
+      const cursor = createCursor();
+      wordsContainer.appendChild(cursor);
+      moveCursor(firstLetter);
+
+      // Focus the words container
+      wordsContainer.tabIndex = -1;
+      wordsContainer.focus();
+
+      window.timer = null;
+      window.gameStart = null;
+      removeClass(document.getElementById('game'), 'over');
+      document.getElementById('info').innerHTML = '0';
+
+      // --------- SPEECH SYNTHESIS LOGIC ---------
+      // Collect the generated words and speak them
+      const generatedText = [...document.querySelectorAll('.word')]
+        .slice(0, 20) // Only use the first 20 words for TTS
+        .map(word => word.innerText) // Extract text content from each word element
+        .join(' '); // Join the words into a single string
+
+      // Set up the speech synthesis
+      speech.text = generatedText;
+      window.speechSynthesis.cancel(); // Cancel any previous speech
+      window.speechSynthesis.speak(speech); // Speak the generated text
+    }
+
+    // --------- WORD CHECK & GAME LOGIC ---------
+    function checkAndScroll(currentWord) {
+      const wordsContainer = document.getElementById('words');
+      const currentWordRect = currentWord.getBoundingClientRect();
+      const containerRect = wordsContainer.getBoundingClientRect();
+      if (currentWordRect.bottom > containerRect.bottom - 250) {
+        wordsContainer.scrollTop += currentWordRect.height;
+      }
+    }
+
+    function getWpm() {
+      const words = [...document.querySelectorAll('.word')];
+      const lastTypedWord = document.querySelector('.word.current');
+      const lastTypedWordIndex = words.indexOf(lastTypedWord);
+      const typedWords = words.slice(0, lastTypedWordIndex + 1);
+      const correctWords = typedWords.filter(word => {
+        const letters = [...word.children];
+        const incorrectLetters = letters.filter(letter => letter.classList.contains('incorrect'));
+        return incorrectLetters.length === 0;
+      });
+      const totalTimeInMinutes = gameTime / 60000;
+      return Math.round(correctWords.length / totalTimeInMinutes);
+    }
+
+    document.addEventListener('keyup', (ev) => {
+      const key = ev.key;
+      const currentWord = document.querySelector('.word.current');
+      const currentLetter = document.querySelector('.letter.current');
+      const expected = currentLetter ? currentLetter.innerHTML || ' ' : '';
+
+      const isLetter = key.length === 1 && key !== ' ';
+      const isSpace = key === ' ';
+      const isBackspace = key === 'Backspace';
+
+      if (document.getElementById('game').classList.contains('over')) return;
+
+      if (!window.timer && isLetter) {
+        window.timer = setInterval(() => {
+          if (!window.gameStart) {
+            window.gameStart = (new Date()).getTime();
+          }
+
+          const currentTime = (new Date()).getTime();
+          const msPassed = currentTime - window.gameStart;
+          const sPassed = Math.round(msPassed / 1000);
+          const sLeft = (gameTime / 1000) - sPassed;
+
+          if (sLeft <= 0) gameOver();
+
+          document.getElementById('info').innerHTML = `${sPassed}`;
+        }, 1000);
+      }
+
+      if (!currentWord || !currentLetter) return;
+
+      if (isLetter) {
+        if (key === expected) {
+          addClass(currentLetter, 'correct');
+          removeClass(currentLetter, 'incorrect');
+        } else {
+          addClass(currentLetter, 'incorrect');
+        }
+
+        removeClass(currentLetter, 'current');
+        const nextLetter = currentLetter.nextElementSibling;
+        if (nextLetter) {
+          addClass(nextLetter, 'current');
+          moveCursor(nextLetter);
+        } else {
+          removeClass(currentWord, 'current');
+          const nextWord = currentWord.nextElementSibling;
+          if (nextWord) {
+            addClass(nextWord, 'current');
+            const firstLetter = nextWord.querySelector('.letter');
+            if (firstLetter) {
+              addClass(firstLetter, 'current');
+              moveCursor(firstLetter);
+            }
+          }
+        }
+      }
+
+      if (isSpace) {
+        [...currentWord.querySelectorAll('.letter:not(.correct)')].forEach(letter => addClass(letter, 'incorrect'));
+        removeClass(currentWord, 'current');
+        const nextWord = currentWord.nextElementSibling;
+        if (nextWord) {
+          addClass(nextWord, 'current');
+          const firstLetter = nextWord.querySelector('.letter');
+          if (firstLetter) {
+            addClass(firstLetter, 'current');
+            moveCursor(firstLetter);
+          }
+        }
+      }
+
+      if (isBackspace) {
+        const prevLetter = currentLetter.previousElementSibling;
+        if (prevLetter) {
+          removeClass(currentLetter, 'current');
+          addClass(prevLetter, 'current');
+          removeClass(prevLetter, 'incorrect');
+          removeClass(prevLetter, 'correct');
+          moveCursor(prevLetter);
+        } else {
+          const prevWord = currentWord.previousElementSibling;
+          if (prevWord) {
+            removeClass(currentWord, 'current');
+            addClass(prevWord, 'current');
+            const lastLetter = prevWord.lastElementChild;
+            if (lastLetter) {
+              addClass(lastLetter, 'current');
+              removeClass(lastLetter, 'incorrect');
+              removeClass(lastLetter, 'correct');
+              moveCursor(lastLetter);
+            }
+          }
+        }
+      }
+
+      if (currentWord) checkAndScroll(currentWord);
+    });
+
+    // Button to restart the game
+    document.getElementById('newGameButton')?.addEventListener('click', () => {
+      gameOver();
+      newGame();
+    });
+
+    
+    newGame();
+  </script>
+</body>
+</html> -->
+
+
+
+
+
